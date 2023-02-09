@@ -5,11 +5,13 @@ import Button from './components/UI/Button/Button';
 import Card from './components/UI/Card/Card';
 
 function App() {
+  const correctObject = {
+    questionsCorrect : 0
+  }
+
   const [quizStartState,setQuizStartState] = useState(false);
   let [questionsAnswered, setQuestionsAnswered] = useState(0);
-  let [correctAnswers, setCorrectAnswers] = useState({
-    questionsCorrect : 5
-  });
+  let [correctAnswers, setCorrectAnswers] = useState(correctObject);
   const [showResults, setShowResults] = useState(false);
 
   const questions = [
@@ -71,46 +73,38 @@ function App() {
     setQuizStartState(true);
     setShowResults(false);
     setQuestionsState(questions);
-    setCorrectAnswers(0);
-  }
-
+    setCorrectAnswers(correctObject);
+  };
 
   const attemptHandler = (event) => {
     setQuestionsAnswered(++questionsAnswered);
 
     const nextQuestionArray = [...questionsState];
     const questionToBeChanged = nextQuestionArray.find(a => 
+      // eslint-disable-next-line
       a.questionId == event.target.parentNode.id
-  );
-
-    const isCorrect = nextQuestionArray.find(a => 
-      a.answer === event.target.value
     );
-
     
     questionToBeChanged.isAnswered=true;
     setQuestionsState(nextQuestionArray);
 
     if(questionToBeChanged.answer === event.target.value) {
-      setCorrectAnswers(++correctAnswers);
+      setCorrectAnswers({
+        questionsCorrect:++correctAnswers.questionsCorrect
+      });
     }
   }
-
-  const correctAnswerUpdateHandler = () => {
-
-  };
 
   const resultsShowHandler = () => {
     setShowResults(true);
     setQuizStartState(false);
-    setQuestionsAnswered(0);
+    setQuestionsAnswered(correctObject);
   };
 
   const questionsCards = questionsState.map((question) => {
     return <Card key={question.questionId}
     id={question.questionId}
     question={question.question}
-    correctAnswerMarkUpdate={correctAnswerUpdateHandler}
     attempt={attemptHandler}
     options={{
     option1: question.option1,
@@ -125,7 +119,7 @@ function App() {
   return (
     <div className="App">
       <h1>Quizz App</h1>
-      {(showResults) ? <Banner correct={correctAnswers}/>:''}
+      {(showResults) ? <Banner correct={correctAnswers.questionsCorrect}/>:''}
       {(!quizStartState) ? <Button handler={quizStartHandler}>Start Quiz</Button>:''}
       {(quizStartState) ? <div>{questionsCards}</div> : ''}
       {(questionsAnswered === 5) ? <Button handler={resultsShowHandler}>Show Results</Button>:''}
